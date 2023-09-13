@@ -1,0 +1,15 @@
+.false.     ! flag
+401         ! nr
+200000       ! niter
+100         ! Re_tau
+1.d-02      ! dr_min
+1.d+00      ! Pr
+0.d-2       ! Bp
+0.d0        !Cp
+0.d0        !Dp
+0.d0        !Ep
+1.d0        ! alphaU 
+1.d0	    ! alphaKt 
+1.d0        ! alphaeps
+1.d0        ! alphaT 
+1.d0	    ! alphaTh2

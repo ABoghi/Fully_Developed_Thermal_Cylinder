@@ -624,8 +624,7 @@ subroutine  output_fields_thermal(nr,r,T,Th2,lambda,dlambdadT,d2lambdadT2,Kt,eps
     q_new = ( dlambdadT / Pr ) * dTh2dr
 
     P_Th2 = ( nut / sigmaT ) * dTdr**2.d0
-    eps_Th2(2:nr-1) = ( eps(2:nr-1) / Kt(2:nr-1) ) * ( lambda(2:nr-1) / Pr ) * Th2(2:nr-1)
-    eps_Th2(1) = eps_Th2(2)
+    eps_Th2(1:nr-1) = ( eps(1:nr-1) / Kt(1:nr-1) ) * ( lambda(1:nr-1) / Pr ) * Th2(1:nr-1)
     eps_Th2(nr) = eps_Th2(nr-1)
 
     T_Th2 = ( nut / sigmaTh2 )*d2Th2dr2 + ( dTh2dr / sigmaTh2 ) * dnutdr
@@ -800,17 +799,17 @@ subroutine  solve_u(U,nut,dnutdr,r,detadr,d2etadr2,deta,Re_tau,nr)
     enddo
     U(nr) = 0.d0
 
-    U(1) = C_apex(1) + A(1)*U(2)
-    do j =2,nr-1
-        call u_coefficients(aU_w,aU_e,sU,nut(j),dnutdr(j),deta,Re_tau,d2etadr2(j),detadr(j),r(j))
-        U(j) =  sU + aU_e*U(j+1) + aU_w*U(j-1)
-        !!!U(j) = A(j) * U(j+1) + C_apex(j)
-    enddo
+    !U(1) = C_apex(1) + A(1)*U(2)
+    !do j =2,nr-1
+    !    call u_coefficients(aU_w,aU_e,sU,nut(j),dnutdr(j),deta,Re_tau,d2etadr2(j),detadr(j),r(j))
+    !    U(j) =  sU + aU_e*U(j+1) + aU_w*U(j-1)
+    !    !!!U(j) = A(j) * U(j+1) + C_apex(j)
+    !enddo
     U(nr) = 0.d0
 
-    !do j =nr-1,1,-1 ! 1,nr-1 !
-    !    U(j) = A(j) * U(j+1) + C_apex(j)
-    !enddo
+    do j =nr-1,1,-1 ! 1,nr-1 !
+        U(j) = A(j) * U(j+1) + C_apex(j)
+    enddo
 
     end
 
@@ -851,7 +850,12 @@ subroutine  solve_Kt(Kt,eps,dUdr,nut,dnutdr,r,detadr,d2etadr2,deta,sigmak,nr)
     enddo
     
     !do j =nr-1,1,-1 ! 1,nr-1 !
-    !    Kt(j) = A(j) * Kt(j+1) + C_apex(j)
+    !    temp = A(j) * Kt(j+1) + C_apex(j)
+    !    if(temp < 0.d0) then 
+    !        print*, ' j =',j,'; A(j) = ',A(j),'; C_apex(j) = ',C_apex(j)
+    !    else
+    !        Kt(j) =  temp
+    !    endif
     !enddo
 
     end
@@ -869,7 +873,7 @@ subroutine  solve_eps(Kt,eps,dUdr,nut,dnutdr,r,detadr,d2etadr2,deta,sigmae,ce1,c
     real*8, intent(in) :: ce1,ce2,f1,f2(1:nr)
     real*8, intent(inout) :: eps(1:nr)
     real*8 aE_w,aE_e,sE
-    real*8 A(1:nr),C_apex(1:nr),denominator
+    real*8 A(1:nr),C_apex(1:nr),denominator,temp
     integer j
 
     call E_coefficients(aE_w,aE_e,sE,eps(1),Kt(1),nut(1),dnutdr(1),dUdr(1),deta,sigmae,Ce1,f1,Ce2,f2(1),d2etadr2(1), &
@@ -895,7 +899,12 @@ subroutine  solve_eps(Kt,eps,dUdr,nut,dnutdr,r,detadr,d2etadr2,deta,sigmae,ce1,c
     enddo
     !print*, ' eps(nr) = ',eps(nr)
     !do j =nr-1,1,-1 ! 1,nr-1 !
-    !    eps(j) = A(j) * eps(j+1) + C_apex(j)
+    !    temp = A(j) * eps(j+1) + C_apex(j)
+    !    if(temp < 0.d0) then 
+    !        print*, ' j =',j,'; A(j) = ',A(j),'; C_apex(j) = ',C_apex(j)
+    !    else
+    !        eps(j) =  temp
+    !    endif
     !enddo    
 
     end
